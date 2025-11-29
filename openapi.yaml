@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  title: Hospital Management System API
+  description: API for managing hospital operations including users, appointments, and treatments.
+  version: 1.0.0
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  role:
+                    type: string
+  /auth/register:
+    post:
+      summary: Patient registration
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Registration successful
+  /auth/profile:
+    get:
+      summary: Get current user profile
+      responses:
+        '200':
+          description: Profile data
+    put:
+      summary: Update profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+  /admin/users:
+    get:
+      summary: Get system statistics
+      responses:
+        '200':
+          description: Counts of doctors, patients, appointments
+  /admin/doctors:
+    post:
+      summary: Add a new doctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                specialization:
+                  type: string
+                availability:
+                  type: object
+      responses:
+        '200':
+          description: Doctor created
+  /admin/doctors/{id}:
+    put:
+      summary: Edit doctor details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                specialization:
+                  type: string
+                is_blacklisted:
+                  type: boolean
+                availability:
+                  type: object
+      responses:
+        '200':
+          description: Updated
+  /admin/patients/{id}/blacklist:
+    post:
+      summary: Blacklist a patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Blacklisted
+  /admin/patients/{id}/unblacklist:
+    post:
+      summary: Unblacklist a patient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Unblacklisted
+  /admin/trigger_reminders:
+    post:
+      summary: Trigger daily reminders
+      responses:
+        '200':
+          description: Triggered
+  /admin/trigger_monthly_reports:
+    post:
+      summary: Trigger monthly reports generation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                year:
+                  type: integer
+                month:
+                  type: integer
+      responses:
+        '200':
+          description: Triggered
+  /doctor/dashboard:
+    get:
+      summary: Get doctor dashboard data
+      responses:
+        '200':
+          description: Appointments and availability
+  /doctor/set_availability:
+    post:
+      summary: Set doctor availability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                availability:
+                  type: object
+      responses:
+        '200':
+          description: Saved
+  /doctor/appointments/{id}/treatment:
+    put:
+      summary: Update treatment for an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                diagnosis:
+                  type: string
+                prescription:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+  /patient/search_doctors:
+    get:
+      summary: Search for doctors
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of doctors
+  /patient/history:
+    get:
+      summary: Get patient treatment history
+      responses:
+        '200':
+          description: List of treatments
+  /appointments/slots:
+    get:
+      summary: Get available slots for a doctor
+      parameters:
+        - name: doctor_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of time slots
+  /appointments/book:
+    post:
+      summary: Book an appointment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctor_id:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+                time:
+                  type: string
+                  format: time
+      responses:
+        '200':
+          description: Booked
+  /appointments/{id}/reschedule:
+    post:
+      summary: Reschedule an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                time:
+                  type: string
+      responses:
+        '200':
+          description: Rescheduled
+  /appointments/{id}/cancel:
+    post:
+      summary: Cancel an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cancelled
+  /appointments/my:
+    get:
+      summary: Get my appointments
+      responses:
+        '200':
+          description: List of appointments
+  /appointments/export_my_treatments:
+    post:
+      summary: Request export of treatments
+      responses:
+        '200':
+          description: Export enqueued
+  /appointments/export_download/{job_id}:
+    get:
+      summary: Download exported file
+      security: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: File download
