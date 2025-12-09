@@ -27,7 +27,7 @@ A comprehensive web-based application for managing hospital operations, includin
 
 1.  **Clone the repository**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/jayesh-bansal/Hospital-Management-System.git
     cd Hospital_Management_System
     ```
 
